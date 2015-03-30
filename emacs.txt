@@ -1,0 +1,142 @@
+;; To configure the C0 emacs mode, put the following three lines
+;; into your .emacs configuration file:
+
+;; Keep Updated
+(global-auto-revert-mode t)
+
+;; Set Mark Color
+(transient-mark-mode t)
+
+;; Load Line Number Script
+(add-to-list 'load-path "~/.scripts")                                                 
+(require 'linum)
+(global-linum-mode 1)
+(global-hl-line-mode 1)
+(setq linum-format "%d ")
+
+;;(set-face-background 'hl-line "00000FF")  ;; Emacs 22 Only
+(set-face-background 'hl-line "grey")
+;;(set-face-foreground 'highlight "red")
+
+;; Cuda color coding
+(add-to-list 'auto-mode-alist '("\\.cu\\'" . c++-mode))
+
+;; Add Color Theme
+(add-to-list 'load-path "~/color-theme-6.6.0")
+(require 'color-theme)
+(eval-after-load "color-theme"
+'(progn
+  (color-theme-initialize)
+   (color-theme-hober)))
+
+;; Mode Line Colors
+;; Note: foreground = font color
+(set-face-attribute  'mode-line
+                 nil 
+                 :foreground "red"
+                 :background "gray10" 
+                 :box '(:line-width 1 :style released-button))
+
+(set-face-attribute  'mode-line-inactive
+                 nil 
+                 :foreground "gray30"
+                 :background "gray30" 
+                 :box '(:line-width 1 :style released-button))
+
+;; ShortCuts
+(global-set-key "\C-j" 'goto-line)
+(global-set-key "\C-j" 'goto-line)
+(global-set-key "\C-u" 'previous-line)
+(global-set-key "\C-n" 'next-line)
+(global-set-key "\C-h" 'backward-char)
+(global-set-key "\C-l" 'forward-char)
+
+(put 'erase-buffer 'disabled nil);; Not sure what this does but i've always had it
+
+;; SCROLLING
+
+;; scroll one line at a time (less "jumpy" than defaults)
+    
+(setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
+    
+(setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+
+(setq scroll-step 1) ;; keyboard scroll one line at a time
+
+(setq redisplay-dont-pause t)
+
+;; Enable mouse support Of Course
+(unless window-system
+  (require 'mouse)
+  (xterm-mouse-mode t)
+  (global-set-key [mouse-4] '(lambda ()
+                              (interactive)
+                              (scroll-down 1)))
+  (global-set-key [mouse-5] '(lambda ()
+                              (interactive)
+                              (scroll-up 1)))
+  (defun track-mouse (e))
+  (setq mouse-sel-mode t)
+)
+;;(setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+    
+(setq scroll-step 1) ;; keyboard scroll one line at a time
+
+;; Set Comments Color
+(set-face-foreground 'font-lock-comment-face "light pink")
+
+;; ModeLine
+(setq-default mode-line-format
+  (list
+    ;; the buffer name; the file name as a tool tip
+    '(:eval (propertize "%b " 'face 'font-lock-keyword-face
+        'help-echo (buffer-file-name)))
+
+    ;; line and column
+    "(" ;; '%02' to set to 2 chars at least; prevents flickering
+      (propertize "Row:%02l" 'face 'font-lock-type-face) ","
+      (propertize "Col:%02c" 'face 'font-lock-type-face) 
+    ") "
+
+    ;; relative position, size of file
+    "["
+    (propertize "%p" 'face 'font-lock-constant-face) ;; % above top
+    "/"
+    (propertize "%I" 'face 'font-lock-constant-face) ;; size
+    "] "
+
+    ;; the current major mode for the buffer.
+    ;;"["
+
+    ;;'(:eval (propertize "%m" 'face 'font-lock-string-face
+    ;;          'help-echo buffer-file-coding-system))
+    ;;"] "
+
+
+    "[" ;; insert vs overwrite mode, input-method in a tooltip
+    '(:eval (propertize (if overwrite-mode "Ovr" "Ins")
+              'face 'font-lock-preprocessor-face
+              'help-echo (concat "Buffer is in "
+                           (if overwrite-mode "overwrite" "insert") " mode")))
+
+    ;; was this buffer modified since the last save?
+    '(:eval (when (buffer-modified-p)
+              (concat ","  (propertize "Mod"
+                             'face 'font-lock-warning-face
+                             'help-echo "Buffer has been modified"))))
+
+    ;; is this buffer read-only?
+    '(:eval (when buffer-read-only
+              (concat ","  (propertize "RO"
+                             'face 'font-lock-type-face
+                             'help-echo "Buffer is read-only"))))  
+    "] "
+    
+    ;; add the time, with the date and the emacs uptime in the tooltip
+    '(:eval (propertize (format-time-string "%I:%M %p | %a %b %d %Y")))
+
+    ;;" --"
+    ;; i don't want to see minor-modes; but if you want, uncomment this:
+    ;; minor-mode-alist  ;; list of minor modes
+    ;;"%-" ;; fill with '-'
+    ))
